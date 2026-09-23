@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMOKEGUARD - Live Monitor</title>
+<title>GAS DETECTOR</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,36 +15,16 @@ body {
     color: #e0e0e0;
     min-height: 100vh;
     padding: 12px;
-    background-image: radial-gradient(ellipse at top, #1a0f30 0%, #0a0a12 70%);
+    background-image: radial-gradient(ellipse at top, #0a2a1a 0%, #0a0a12 70%);
 }
 .container { max-width: 500px; margin: 0 auto; }
-
-.header { text-align: center; padding: 16px 0 20px; position: relative; }
+.header { text-align: center; padding: 20px 0 24px; }
 .header .logo {
-    font-size: 24px; font-weight: 900; letter-spacing: 3px;
-    background: linear-gradient(135deg, #ff6b35, #ff3355);
+    font-size: 28px; font-weight: 900; letter-spacing: 3px;
+    background: linear-gradient(135deg, #00ff88, #00cc66);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .header .sub { font-size: 9px; color: #666; letter-spacing: 4px; margin-top: 4px; }
-.status-pill {
-    position: absolute; top: 20px; right: 0;
-    display: flex; align-items: center; gap: 6px;
-    padding: 6px 12px; background: rgba(0, 255, 136, 0.1);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 20px; font-size: 10px; font-weight: 700; color: #00ff88;
-}
-.status-pill.off {
-    background: rgba(255, 51, 85, 0.1);
-    border-color: rgba(255, 51, 85, 0.3); color: #ff3355;
-}
-.status-dot {
-    width: 8px; height: 8px; background: #00ff88;
-    border-radius: 50%; box-shadow: 0 0 8px #00ff88;
-    animation: blink 1.5s infinite;
-}
-.status-pill.off .status-dot { background: #ff3355; box-shadow: 0 0 8px #ff3355; }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
 .main-card {
     background: rgba(15,15,25,0.9); border: 1px solid #2a2a3a;
     border-radius: 20px; padding: 24px 18px; margin-bottom: 14px; text-align: center;
@@ -61,7 +41,6 @@ body {
     text-transform: uppercase; margin-top: 10px;
     color: #00ff88;
 }
-
 .card {
     background: rgba(15,15,25,0.9); border: 1px solid #2a2a3a;
     border-radius: 16px; padding: 18px; margin-bottom: 14px;
@@ -70,9 +49,7 @@ body {
     font-size: 12px; font-weight: 700; letter-spacing: 2px;
     color: #888; text-transform: uppercase; margin-bottom: 14px;
 }
-
 .chart-container { position: relative; height: 200px; }
-
 .history-list { max-height: 250px; overflow-y: auto; }
 .history-item {
     display: flex; justify-content: space-between; padding: 10px 0;
@@ -80,8 +57,10 @@ body {
 }
 .history-item:last-child { border-bottom: none; }
 .history-item .time { color: #666; font-size: 11px; font-family: monospace; }
-.history-item .val { font-weight: 700; padding: 3px 10px; border-radius: 10px; font-size: 11px; background: rgba(0,255,136,0.1); color: #00ff88; }
-
+.history-item .val { font-weight: 700; padding: 3px 10px; border-radius: 10px; font-size: 11px; }
+.history-item .val.safe { background: rgba(0,255,136,0.1); color: #00ff88; }
+.history-item .val.warn { background: rgba(255,204,0,0.1); color: #ffcc00; }
+.history-item .val.danger { background: rgba(255,51,85,0.1); color: #ff3355; }
 .team-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 8px; margin-top: 10px;
@@ -89,24 +68,15 @@ body {
 .team-item {
     background: rgba(255,255,255,0.03); border: 1px solid #2a2a3a;
     border-radius: 12px; padding: 10px 6px; text-align: center;
-    transition: all 0.2s;
-}
-.team-item:hover {
-    border-color: #ff6b35; background: rgba(255,107,53,0.05);
-    transform: translateY(-2px);
 }
 .team-name { font-size: 10px; font-weight: 700; color: #fff; margin-bottom: 5px; letter-spacing: 1px; }
-.team-role {
-    display: inline-block; font-size: 7px; font-weight: 700;
-    padding: 3px 7px; border-radius: 10px; letter-spacing: 1px;
-}
+.team-role { display: inline-block; font-size: 7px; font-weight: 700; padding: 3px 7px; border-radius: 10px; letter-spacing: 1px; }
 .team-role.coding { background: rgba(0,212,255,0.1); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
 .team-role.assembly { background: rgba(255,204,0,0.1); color: #ffcc00; border: 1px solid rgba(255,204,0,0.3); }
 .team-role.documentation { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
 .team-role.ppt { background: rgba(255,107,53,0.1); color: #ff6b35; border: 1px solid rgba(255,107,53,0.3); }
 .team-role.poster { background: rgba(255,51,85,0.1); color: #ff3355; border: 1px solid rgba(255,51,85,0.3); }
 .team-role.module { background: rgba(168,85,247,0.1); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
-
 .footer { text-align: center; font-size: 10px; color: #333; letter-spacing: 2px; padding: 20px 0 10px; }
 .empty { text-align: center; padding: 30px 10px; color: #444; font-size: 12px; font-style: italic; }
 </style>
@@ -115,30 +85,22 @@ body {
 
 <div class="container">
     <div class="header">
-        <div class="logo">🔥 SMOKEGUARD</div>
+        <div class="logo">⚡ GAS DETECTOR</div>
         <div class="sub">LIVE MONITOR</div>
-        <div class="status-pill off" id="statusPill">
-            <span class="status-dot"></span>
-            <span id="statusText">OFFLINE</span>
-        </div>
     </div>
-
     <div class="main-card">
-        <div class="level-label">GAS / SMOKE LEVEL</div>
+        <div class="level-label">GAS LEVEL</div>
         <div class="level-value" id="levelValue">0<span class="level-max">%</span></div>
-        <div class="status-text" id="statusLevel">WAITING FOR DATA...</div>
+        <div class="status-text" id="statusLevel">WAITING...</div>
     </div>
-
     <div class="card">
         <h3>📊 Real-Time Chart</h3>
         <div class="chart-container"><canvas id="chart"></canvas></div>
     </div>
-
     <div class="card">
         <h3>🕐 History</h3>
         <div class="history-list" id="historyList"><div class="empty">No data yet</div></div>
     </div>
-
     <div class="card">
         <h3>👥 Team Members</h3>
         <div class="team-grid">
@@ -155,8 +117,7 @@ body {
             <div class="team-item"><div class="team-name">CINSCA</div><div class="team-role module">MODULE</div></div>
         </div>
     </div>
-
-    <div class="footer">SMOKEGUARD v1.0 • Live Monitor</div>
+    <div class="footer">GAS DETECTOR v1.0 • Live Monitor</div>
 </div>
 
 <script>
@@ -177,7 +138,6 @@ let chart;
 let chartData = { labels: [], values: [] };
 let history = [];
 let lastHistoryTime = 0;
-let lastUpdateTime = 0;
 
 function initChart() {
     const ctx = document.getElementById('chart').getContext('2d');
@@ -187,8 +147,8 @@ function initChart() {
             labels: chartData.labels,
             datasets: [{
                 data: chartData.values,
-                borderColor: '#ff6b35',
-                backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                borderColor: '#00ff88',
+                backgroundColor: 'rgba(0, 255, 136, 0.1)',
                 borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0
             }]
         },
@@ -199,8 +159,7 @@ function initChart() {
                 y: { beginAtZero: true, max: 100,
                      grid: { color: 'rgba(255,255,255,0.05)' },
                      ticks: { color: '#666', font: { size: 10 }, callback: v => v + '%' } },
-                x: { grid: { display: false },
-                     ticks: { color: '#666', font: { size: 10 } } }
+                x: { grid: { display: false }, ticks: { color: '#666', font: { size: 10 } } }
             },
             animation: { duration: 300 }
         }
@@ -212,12 +171,12 @@ function updateUI(level) {
     lv.innerHTML = Math.round(level) + '<span class="level-max">%</span>';
     const st = document.getElementById('statusLevel');
 
-    if (level >= 70) {
+    if (level > 80) {
         lv.style.color = '#ff3355';
         lv.style.textShadow = '0 0 30px rgba(255,51,85,0.5)';
         st.style.color = '#ff3355';
         st.textContent = 'DANGER - GAS DETECTED!';
-    } else if (level >= 40) {
+    } else if (level > 50) {
         lv.style.color = '#ffcc00';
         lv.style.textShadow = '0 0 30px rgba(255,204,0,0.5)';
         st.style.color = '#ffcc00';
@@ -235,7 +194,10 @@ function addHistory(level) {
     const time = String(now.getHours()).padStart(2,'0') + ':' +
                  String(now.getMinutes()).padStart(2,'0') + ':' +
                  String(now.getSeconds()).padStart(2,'0');
-    history.unshift({ time, level });
+    let status = 'safe';
+    if (level > 80) status = 'danger';
+    else if (level > 50) status = 'warn';
+    history.unshift({ time, level, status });
     if (history.length > 50) history.pop();
     renderHistory();
 }
@@ -249,75 +211,36 @@ function renderHistory() {
     list.innerHTML = history.map(h => `
         <div class="history-item">
             <span class="time">${h.time}</span>
-            <span class="val">${Math.round(h.level)}%</span>
+            <span class="val ${h.status}">${Math.round(h.level)}% - ${h.status.toUpperCase()}</span>
         </div>
     `).join('');
 }
 
-// ============ FIREBASE LISTENER 24 JAM ============
-function listenData() {
-    // Listen level
-    db.ref('smokeguard/level').on('value', (snapshot) => {
-        const level = snapshot.val() || 0;
-        lastUpdateTime = Date.now();
-        updateUI(level);
+db.ref('gasdetector/level').on('value', (snapshot) => {
+    const level = snapshot.val() || 0;
+    updateUI(level);
 
-        const now = new Date();
-        const time = String(now.getHours()).padStart(2,'0') + ':' +
-                     String(now.getMinutes()).padStart(2,'0') + ':' +
-                     String(now.getSeconds()).padStart(2,'0');
-        chartData.labels.push(time);
-        chartData.values.push(level);
-        if (chartData.labels.length > 60) {
-            chartData.labels.shift();
-            chartData.values.shift();
-        }
-        chart.update();
-
-        const nowTime = Date.now();
-        if (nowTime - lastHistoryTime > 10000) {
-            addHistory(level);
-            lastHistoryTime = nowTime;
-        }
-    });
-
-    // Listen last_update (buat deteksi offline)
-    db.ref('smokeguard/last_update').on('value', (snapshot) => {
-        const val = snapshot.val();
-        if (val) lastUpdateTime = val;
-    });
-
-    // Listen online
-    db.ref('smokeguard/online').on('value', (snapshot) => {
-        const online = snapshot.val();
-        const pill = document.getElementById('statusPill');
-        const txt = document.getElementById('statusText');
-        
-        if (online && (Date.now() - lastUpdateTime) < 30000) {
-            pill.className = 'status-pill';
-            txt.textContent = 'ONLINE';
-        } else {
-            pill.className = 'status-pill off';
-            txt.textContent = 'OFFLINE';
-        }
-    });
-}
-
-// Cek offline tiap 5 detik
-setInterval(() => {
-    if (lastUpdateTime === 0) return;
-    const selisih = (Date.now() - lastUpdateTime) / 1000;
-    if (selisih > 30) {
-        const pill = document.getElementById('statusPill');
-        const txt = document.getElementById('statusText');
-        pill.className = 'status-pill off';
-        txt.textContent = 'OFFLINE';
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2,'0') + ':' +
+                 String(now.getMinutes()).padStart(2,'0') + ':' +
+                 String(now.getSeconds()).padStart(2,'0');
+    chartData.labels.push(time);
+    chartData.values.push(level);
+    if (chartData.labels.length > 60) {
+        chartData.labels.shift();
+        chartData.values.shift();
     }
-}, 5000);
+    chart.update();
+
+    const nowTime = Date.now();
+    if (nowTime - lastHistoryTime > 10000) {
+        addHistory(level);
+        lastHistoryTime = nowTime;
+    }
+});
 
 initChart();
-listenData();
-console.log('🔥 SMOKEGUARD Live Monitor Ready');
+console.log('⚡ GAS DETECTOR Live Monitor Ready');
 </script>
 
 </body>
