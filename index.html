@@ -189,7 +189,6 @@ body {
 
 <div class="container">
     <div class="header">
-        <!-- LOGO SEKOLAH (file lokal) -->
         <img src="logo.png" alt="School Logo" class="school-logo">
         <div class="logo">⚡ GAS DETECTOR</div>
         <div class="sub">LIVE MONITOR</div>
@@ -218,7 +217,6 @@ body {
         <div class="notif-list" id="notifList"><div class="empty">No notifications yet</div></div>
     </div>
 
-    <!-- QR CODE VOTING (file lokal) -->
     <div class="card">
         <div class="qr-section">
             <h3>🗳️ VOTING OUR PRODUCT</h3>
@@ -271,6 +269,13 @@ let notifEnabled = false;
 let lastLevel = 0;
 let lastStatus = 'safe';
 
+// ============ DAFTAR SERVICE WORKER (buat notif Android) ============
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('✅ Service Worker registered'))
+        .catch(err => console.error('❌ SW registration failed:', err));
+}
+
 // ============ NOTIFICATION PERMISSION ============
 function requestNotifPermission() {
     if (!('Notification' in window)) {
@@ -292,17 +297,40 @@ function requestNotifPermission() {
     });
 }
 
-// ============ SEND NOTIFICATION ============
+// ============ SEND NOTIFICATION (pakai Service Worker buat Android) ============
 function sendNotification(title, body, icon) {
     if (notifEnabled && Notification.permission === 'granted') {
-        new Notification(title, {
-            body: body,
-            icon: 'logo.png',
-            badge: 'logo.png',
-            vibrate: [200, 100, 200, 100, 200],
-            tag: 'gas-alert',
-            requireInteraction: true
-        });
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            // Android Chrome & browser modern → pakai Service Worker
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification(title, {
+                    body: body,
+                    icon: 'logo.png',
+                    badge: 'logo.png',
+                    vibrate: [200, 100, 200, 100, 200],
+                    tag: 'gas-alert',
+                    requireInteraction: true
+                });
+            }).catch(err => {
+                console.error('SW notification failed:', err);
+                // Fallback ke constructor lama (desktop)
+                try {
+                    new Notification(title, { body: body, icon: 'logo.png' });
+                } catch(e) { console.error('Fallback notif failed:', e); }
+            });
+        } else {
+            // Desktop / browser lama → pakai constructor biasa
+            try {
+                new Notification(title, {
+                    body: body,
+                    icon: 'logo.png',
+                    badge: 'logo.png',
+                    vibrate: [200, 100, 200, 100, 200],
+                    tag: 'gas-alert',
+                    requireInteraction: true
+                });
+            } catch(e) { console.error('Notif failed:', e); }
+        }
     }
     
     showToastNotif(icon, title, body);
