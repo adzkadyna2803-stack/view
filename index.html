@@ -89,7 +89,6 @@ body {
 .history-item .val.warn { background: rgba(255,204,0,0.1); color: #ffcc00; }
 .history-item .val.danger { background: rgba(255,51,85,0.1); color: #ff3355; }
 
-/* NOTIFICATION LOG */
 .notif-list { max-height: 300px; overflow-y: auto; }
 .notif-item {
     display: flex; align-items: center; gap: 10px; padding: 12px 0;
@@ -141,7 +140,6 @@ body {
 .footer { text-align: center; font-size: 10px; color: #333; letter-spacing: 2px; padding: 20px 0 10px; }
 .empty { text-align: center; padding: 30px 10px; color: #444; font-size: 12px; font-style: italic; }
 
-/* TOAST NOTIFICATION */
 .toast-notif {
     position: fixed;
     top: 20px;
@@ -191,7 +189,8 @@ body {
 
 <div class="container">
     <div class="header">
-        <img src="https://files.catbox.moe/s6gzc2.png" alt="School Logo" class="school-logo">
+        <!-- LOGO SEKOLAH (file lokal) -->
+        <img src="logo.png" alt="School Logo" class="school-logo">
         <div class="logo">⚡ GAS DETECTOR</div>
         <div class="sub">LIVE MONITOR</div>
     </div>
@@ -214,17 +213,16 @@ body {
         <div class="history-list" id="historyList"><div class="empty">No data yet</div></div>
     </div>
 
-    <!-- NOTIFICATION LOG -->
     <div class="card">
         <h3>🔔 Notifications</h3>
         <div class="notif-list" id="notifList"><div class="empty">No notifications yet</div></div>
     </div>
 
-    <!-- QR CODE VOTING -->
+    <!-- QR CODE VOTING (file lokal) -->
     <div class="card">
         <div class="qr-section">
             <h3>🗳️ VOTING OUR PRODUCT</h3>
-            <img src="https://files.catbox.moe/3vlvws.png" alt="Voting QR Code">
+            <img src="qr.png" alt="Voting QR Code">
             <p>Scan QR Code untuk vote produk kami</p>
         </div>
     </div>
@@ -296,22 +294,19 @@ function requestNotifPermission() {
 
 // ============ SEND NOTIFICATION ============
 function sendNotification(title, body, icon) {
-    // Browser notification
     if (notifEnabled && Notification.permission === 'granted') {
         new Notification(title, {
             body: body,
-            icon: 'https://files.catbox.moe/s6gzc2.png',
-            badge: 'https://files.catbox.moe/s6gzc2.png',
+            icon: 'logo.png',
+            badge: 'logo.png',
             vibrate: [200, 100, 200, 100, 200],
             tag: 'gas-alert',
             requireInteraction: true
         });
     }
     
-    // Toast notification
     showToastNotif(icon, title, body);
     
-    // Add to log
     const now = new Date();
     const time = String(now.getHours()).padStart(2,'0') + ':' +
                  String(now.getMinutes()).padStart(2,'0') + ':' +
@@ -472,30 +467,17 @@ db.ref('gasdetector/level').on('value', (snapshot) => {
         lastHistoryTime = nowTime;
     }
     
-    // DETEKSI PERUBAHAN STATUS
     let currentStatus = 'safe';
     if (level > 80) currentStatus = 'danger';
     else if (level > 50) currentStatus = 'warn';
     
     if (currentStatus !== lastStatus) {
         if (currentStatus === 'danger') {
-            sendNotification(
-                '🚨 GAS DANGER DETECTED!',
-                `Level gas: ${Math.round(level)}% - Segera cek!`,
-                '🚨'
-            );
+            sendNotification('🚨 GAS DANGER DETECTED!', `Level gas: ${Math.round(level)}% - Segera cek!`, '🚨');
         } else if (currentStatus === 'warn') {
-            sendNotification(
-                '⚠️ GAS WARNING',
-                `Level gas: ${Math.round(level)}% - Waspada!`,
-                '⚠️'
-            );
+            sendNotification('⚠️ GAS WARNING', `Level gas: ${Math.round(level)}% - Waspada!`, '⚠️');
         } else if (currentStatus === 'safe' && lastStatus === 'danger') {
-            sendNotification(
-                '✅ GAS SAFE',
-                `Level gas: ${Math.round(level)}% - Kondisi aman`,
-                '✅'
-            );
+            sendNotification('✅ GAS SAFE', `Level gas: ${Math.round(level)}% - Kondisi aman`, '✅');
         }
         
         lastStatus = currentStatus;
